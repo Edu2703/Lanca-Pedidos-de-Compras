@@ -463,6 +463,91 @@
     display: block;
   }
 
+  /* ══ CHECKLIST ══ */
+  .checklist-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .checklist-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .checklist-items {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.2s;
+    user-select: none;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .check-item:hover { border-color: rgba(232,255,71,0.3); }
+
+  .check-item.checked {
+    border-color: var(--success);
+    background: rgba(71,255,154,0.06);
+  }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.2s;
+    color: transparent;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--success);
+    border-color: var(--success);
+    color: #0f0f0f;
+  }
+
+  .check-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s;
+    line-height: 1.3;
+  }
+
+  .check-item.checked .check-text { color: var(--text); }
+
+  .btn-webhook:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
   /* ══ RESPONSIVE ══ */
   @media (max-width: 640px) {
     header { padding: 0 16px; }
@@ -470,6 +555,7 @@
     .page-title { font-size: 30px; }
     .page-header { flex-direction: column; align-items: flex-start; }
     .btn-webhook { width: 100%; text-align: center; }
+    .checklist-bar { flex-direction: column; align-items: flex-start; }
   }
 </style>
 </head>
@@ -509,7 +595,21 @@
         <h1 class="page-title">Lista de<br><span>Fornecedores</span></h1>
         <p class="page-subtitle">Busque e consulte os fornecedores cadastrados.</p>
       </div>
-      <button class="btn-webhook" onclick="openModal()">＋ Criar Pedido de Compras no Bling</button>
+      <button class="btn-webhook" id="btn-webhook" onclick="openModal()" disabled>＋ Criar Pedido de Compras no Bling</button>
+    </div>
+
+    <div class="checklist-bar">
+      <div class="checklist-title">Antes de criar o pedido:</div>
+      <div class="checklist-items">
+        <div class="check-item" id="check1" onclick="toggleCheck('check1')">
+          <div class="check-box">✓</div>
+          <div class="check-text">Subiu o arquivo no Drive?</div>
+        </div>
+        <div class="check-item" id="check2" onclick="toggleCheck('check2')">
+          <div class="check-box">✓</div>
+          <div class="check-text">O fornecedor está na lista abaixo?</div>
+        </div>
+      </div>
     </div>
 
     <div class="search-wrapper">
@@ -711,6 +811,17 @@ function onSearch(value) {
     );
     renderSuppliers(results);
   }, 250);
+}
+
+// ═══════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════
+function toggleCheck(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('checked');
+  const allChecked = document.getElementById('check1').classList.contains('checked') &&
+                     document.getElementById('check2').classList.contains('checked');
+  document.getElementById('btn-webhook').disabled = !allChecked;
 }
 
 // ═══════════════════════════════════════
