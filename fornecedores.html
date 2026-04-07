@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Fornecedores</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --text: #f0f0f0;
+    --muted: #888;
+    --danger: #ff4747;
+    --success: #47ff9a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ══ LOGIN ══ */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 48px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+  }
+
+  .login-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .login-subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .field-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .field-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 20px;
+    border-radius: 2px;
+  }
+
+  .field-input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 4px;
+    border-radius: 2px;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .login-error {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(255,71,71,0.1);
+    border: 1px solid rgba(255,71,71,0.3);
+    color: var(--danger);
+    font-size: 13px;
+    display: none;
+    border-radius: 2px;
+  }
+
+  /* ══ APP ══ */
+  #app { display: none; min-height: 100vh; position: relative; z-index: 1; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    background: rgba(15,15,15,0.9);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .header-user { display: flex; align-items: center; gap: 12px; }
+  .user-badge { font-size: 12px; color: var(--muted); }
+  .user-name { color: var(--text); font-weight: 500; }
+
+  .btn-logout {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 42px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .page-title span { color: var(--accent); }
+  .page-subtitle { color: var(--muted); font-size: 15px; }
+
+  .btn-webhook {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .btn-webhook:hover { opacity: 0.88; }
+  .btn-webhook:active { transform: scale(0.99); }
+
+  /* ══ SEARCH ══ */
+  .search-wrapper { position: relative; margin-bottom: 24px; }
+
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 18px;
+    pointer-events: none;
+  }
+
+  #search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 16px 18px 16px 52px;
+    outline: none;
+    transition: border-color 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  #search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,255,71,0.08);
+  }
+
+  #search-input::placeholder {
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* ══ TABLE HEADER ══ */
+  .table-header {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 16px;
+    padding: 8px 24px;
+    margin-bottom: 8px;
+  }
+
+  .table-header-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ══ CARDS ══ */
+  #results-area { min-height: 200px; }
+
+  .result-count {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .result-count span { color: var(--accent); font-weight: 600; }
+
+  .supplier-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 18px 24px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 16px;
+    align-items: center;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: fadeIn 0.25s ease both;
+  }
+
+  .supplier-card:hover {
+    border-color: rgba(232,255,71,0.3);
+    transform: translateX(3px);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .supplier-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    color: var(--text);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--success);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+  }
+
+  .status-badge.inactive { color: var(--muted); }
+  .status-badge.inactive .status-dot { background: var(--muted); }
+
+  /* ══ ESTADOS ══ */
+  .state-box {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--muted);
+  }
+
+  .state-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+
+  .state-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .state-desc { font-size: 14px; }
+
+  /* ══ MODAL ══ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modal-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .modal-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+
+  .modal-body {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .modal-body iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+    display: block;
+  }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 640px) {
+    header { padding: 0 16px; }
+    main { padding: 32px 16px; }
+    .page-title { font-size: 30px; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .btn-webhook { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">▣ FORNECEDORES</div>
+    <h1 class="login-title">Bem-vindo<br>de volta.</h1>
+    <p class="login-subtitle">Faça login para acessar a lista de fornecedores.</p>
+
+    <label class="field-label" for="login-user">Usuário</label>
+    <input class="field-input" type="text" id="login-user" placeholder="seu usuário" autocomplete="username">
+
+    <label class="field-label" for="login-pass">Senha</label>
+    <input class="field-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+
+    <button class="btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-brand">▣ Fornecedores</div>
+    <div class="header-user">
+      <span class="user-badge">Logado como <span class="user-name" id="logged-name"></span></span>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Lista de<br><span>Fornecedores</span></h1>
+        <p class="page-subtitle">Busque e consulte os fornecedores cadastrados.</p>
+      </div>
+      <button class="btn-webhook" onclick="openModal()">＋ Criar Pedido de Compras no Bling</button>
+    </div>
+
+    <div class="search-wrapper">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search-input" placeholder="Buscar fornecedor..." oninput="onSearch(this.value)">
+    </div>
+
+    <div id="results-area">
+      <div class="state-box">
+        <span class="state-icon">🏭</span>
+        <div class="state-title">Carregando fornecedores...</div>
+        <div class="state-desc">Aguarde um momento.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL WEBHOOK -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Criar Pedido de Compras no Bling</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="webhook-frame" src="" title="Criar Pedido de Compras"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIGURAÇÃO
+// ═══════════════════════════════════════
+const SHEET_ID        = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
+const SHEET_SUPPLIERS = 'Lista de fornecedores';
+const SHEET_USERS     = 'USUÁRIOS';
+const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/3746f5da-e2ce-4d32-81b6-77b9b21efc3e';
+
+// Colunas da aba de fornecedores (A=0, B=1)
+const COL_NAME   = 0; // A — Nome do Fornecedor
+const COL_STATUS = 1; // B — Status
+
+// ═══════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════
+let allSuppliers = [];
+let allUsers     = [];
+let dataLoaded   = false;
+let currentUser  = null;
+
+// ═══════════════════════════════════════
+// BUSCAR PLANILHA
+// ═══════════════════════════════════════
+async function fetchSheet(sheetName) {
+  const url  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res  = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(47, text.length - 2));
+  return json.table;
+}
+
+function tableToRows(table) {
+  if (!table || !table.rows) return [];
+  return table.rows.map(row =>
+    (row.c || []).map(cell =>
+      (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v).trim() : ''
+    )
+  );
+}
+
+async function loadData() {
+  const [suppTable, usersTable] = await Promise.all([
+    fetchSheet(SHEET_SUPPLIERS),
+    fetchSheet(SHEET_USERS)
+  ]);
+
+  const suppRows   = tableToRows(suppTable);
+  allSuppliers = suppRows.slice(1).filter(row => row[COL_NAME] && row[COL_NAME].trim() !== '');
+
+  const userRows = tableToRows(usersTable);
+  allUsers = userRows.slice(1).filter(row => row[0] && row[0].trim() !== '');
+
+  dataLoaded = true;
+}
+
+// ═══════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════
+async function doLogin() {
+  const user  = document.getElementById('login-user').value.trim();
+  const pass  = document.getElementById('login-pass').value.trim();
+  const btn   = document.getElementById('btn-login');
+  const errEl = document.getElementById('login-error');
+
+  if (!user || !pass) { showError('Preencha usuário e senha.'); return; }
+
+  btn.disabled    = true;
+  btn.textContent = 'Verificando...';
+  errEl.style.display = 'none';
+
+  try {
+    if (!dataLoaded) await loadData();
+
+    const found = allUsers.find(row =>
+      row[0] && row[1] &&
+      row[0].toLowerCase() === user.toLowerCase() &&
+      row[1] === pass
+    );
+
+    if (found) {
+      currentUser = found[0];
+      document.getElementById('logged-name').textContent = currentUser;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display         = 'block';
+      renderAll();
+      document.getElementById('search-input').focus();
+    } else {
+      showError('Usuário ou senha incorretos.');
+    }
+  } catch (e) {
+    showError('Erro ao carregar dados. Verifique se a planilha está pública.');
+    console.error(e);
+  }
+
+  btn.disabled    = false;
+  btn.textContent = 'Entrar';
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent   = msg;
+  el.style.display = 'block';
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display          = 'none';
+  document.getElementById('login-user').value           = '';
+  document.getElementById('login-pass').value           = '';
+  document.getElementById('search-input').value         = '';
+}
+
+// ═══════════════════════════════════════
+// RENDERIZAR
+// ═══════════════════════════════════════
+function renderAll() {
+  renderSuppliers(allSuppliers);
+}
+
+function renderSuppliers(list) {
+  const area = document.getElementById('results-area');
+
+  if (list.length === 0) {
+    area.innerHTML = `
+      <div class="state-box">
+        <span class="state-icon">🔍</span>
+        <div class="state-title">Nenhum fornecedor encontrado</div>
+        <div class="state-desc">Tente outro termo de busca.</div>
+      </div>`;
+    return;
+  }
+
+  const cards = list.map((row, i) => {
+    const name   = row[COL_NAME]   || '—';
+    const status = row[COL_STATUS] || '';
+    const isActive = status.toLowerCase().includes('ativo');
+
+    return `
+      <div class="supplier-card" style="animation-delay:${i * 0.03}s">
+        <div class="supplier-name">${name}</div>
+        <div class="status-badge ${isActive ? '' : 'inactive'}">
+          <span class="status-dot"></span>
+          ${isActive ? 'Ativo' : (status || 'Inativo')}
+        </div>
+      </div>`;
+  }).join('');
+
+  area.innerHTML = `
+    <div class="result-count">
+      <span>${list.length}</span> fornecedor${list.length > 1 ? 'es' : ''} encontrado${list.length > 1 ? 's' : ''}
+    </div>
+    ${cards}`;
+}
+
+// ═══════════════════════════════════════
+// BUSCA
+// ═══════════════════════════════════════
+let searchTimer = null;
+
+function onSearch(value) {
+  clearTimeout(searchTimer);
+  const q = value.trim().toUpperCase();
+  if (!q) { renderSuppliers(allSuppliers); return; }
+  searchTimer = setTimeout(() => {
+    const results = allSuppliers.filter(row =>
+      row[COL_NAME] && row[COL_NAME].toUpperCase().includes(q)
+    );
+    renderSuppliers(results);
+  }, 250);
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal() {
+  document.getElementById('webhook-frame').src = WEBHOOK_URL;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('webhook-frame').src = '';
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+// ═══════════════════════════════════════
+// ENTER no login
+// ═══════════════════════════════════════
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-user').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-pass').focus();
+});
+</script>
+</body>
+</html>
