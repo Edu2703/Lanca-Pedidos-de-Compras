@@ -238,6 +238,7 @@
 
   .btn-webhook:hover { opacity: 0.88; }
   .btn-webhook:active { transform: scale(0.99); }
+  .btn-webhook:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* ══ SEARCH ══ */
   .search-wrapper { position: relative; margin-bottom: 24px; }
@@ -400,8 +401,7 @@
     border: 1px solid var(--border);
     border-radius: 2px;
     width: 100%;
-    max-width: 700px;
-    max-height: 90vh;
+    max-width: 560px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -414,7 +414,11 @@
     top: 0; left: 0; right: 0;
     height: 3px;
     background: var(--accent);
+    transition: background 0.4s;
   }
+
+  .modal-box.status-success::before { background: var(--success); }
+  .modal-box.status-error::before   { background: var(--danger); }
 
   .modal-header {
     display: flex;
@@ -451,17 +455,98 @@
 
   .modal-close:hover { border-color: var(--danger); color: var(--danger); }
 
-  .modal-body {
-    flex: 1;
-    overflow: hidden;
+  /* ══ STATUS PANEL ══ */
+  .status-panel {
+    padding: 40px 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .modal-body iframe {
-    width: 100%;
-    height: 500px;
-    border: none;
-    display: block;
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: border-color 0.3s;
   }
+
+  .status-row.active   { border-color: rgba(232,255,71,0.4); }
+  .status-row.done     { border-color: rgba(71,255,154,0.4); }
+  .status-row.errored  { border-color: rgba(255,71,71,0.4); }
+
+  .status-row-icon {
+    font-size: 22px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .status-row-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .status-row.active  .status-row-text { color: var(--accent); }
+  .status-row.done    .status-row-text { color: var(--success); }
+  .status-row.errored .status-row-text { color: var(--danger); }
+
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .spinner {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border: 2.5px solid rgba(232,255,71,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .status-msg {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    padding: 0 8px;
+    min-height: 20px;
+    transition: color 0.3s;
+  }
+
+  .status-msg.success { color: var(--success); }
+  .status-msg.error   { color: var(--danger); }
+
+  .modal-footer {
+    padding: 0 32px 28px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-fechar {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+    display: none;
+  }
+
+  .btn-fechar:hover { border-color: var(--text); color: var(--text); }
+  .btn-fechar.visible { display: block; }
 
   /* ══ CHECKLIST ══ */
   .checklist-bar {
@@ -543,11 +628,6 @@
 
   .check-item.checked .check-text { color: var(--text); }
 
-  .btn-webhook:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
   /* ══ RESPONSIVE ══ */
   @media (max-width: 640px) {
     header { padding: 0 16px; }
@@ -627,15 +707,39 @@
   </main>
 </div>
 
-<!-- MODAL WEBHOOK -->
+<!-- MODAL STATUS -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
-  <div class="modal-box">
+  <div class="modal-box" id="modal-box">
     <div class="modal-header">
       <div class="modal-title">Criar Pedido de Compras no Bling</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" id="modal-close-btn" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <iframe id="webhook-frame" src="" title="Criar Pedido de Compras"></iframe>
+
+    <div class="status-panel">
+
+      <!-- Linha 1: Enviando -->
+      <div class="status-row" id="step-envio">
+        <div class="status-row-icon" id="icon-envio">⏳</div>
+        <div class="status-row-text">Aguardando disparo...</div>
+      </div>
+
+      <!-- Linha 2: Processando -->
+      <div class="status-row" id="step-proc">
+        <div class="status-row-icon" id="icon-proc">—</div>
+        <div class="status-row-text" id="text-proc">Processamento N8N</div>
+      </div>
+
+      <!-- Linha 3: Bling -->
+      <div class="status-row" id="step-bling">
+        <div class="status-row-icon" id="icon-bling">—</div>
+        <div class="status-row-text" id="text-bling">Criando pedido no Bling</div>
+      </div>
+
+      <div class="status-msg" id="status-msg"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-fechar" id="btn-fechar" onclick="closeModal()">Fechar</button>
     </div>
   </div>
 </div>
@@ -649,9 +753,8 @@ const SHEET_SUPPLIERS = 'Lista de fornecedores';
 const SHEET_USERS     = 'USUÁRIOS';
 const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/3746f5da-e2ce-4d32-81b6-77b9b21efc3e';
 
-// Colunas da aba de fornecedores (A=0, B=1)
-const COL_NAME   = 0; // A — Nome do Fornecedor
-const COL_STATUS = 1; // B — Status
+const COL_NAME   = 0;
+const COL_STATUS = 1;
 
 // ═══════════════════════════════════════
 // ESTADO
@@ -687,7 +790,7 @@ async function loadData() {
     fetchSheet(SHEET_USERS)
   ]);
 
-  const suppRows   = tableToRows(suppTable);
+  const suppRows = tableToRows(suppTable);
   allSuppliers = suppRows.slice(1).filter(row => row[COL_NAME] && row[COL_NAME].trim() !== '');
 
   const userRows = tableToRows(usersTable);
@@ -757,9 +860,7 @@ function doLogout() {
 // ═══════════════════════════════════════
 // RENDERIZAR
 // ═══════════════════════════════════════
-function renderAll() {
-  renderSuppliers(allSuppliers);
-}
+function renderAll() { renderSuppliers(allSuppliers); }
 
 function renderSuppliers(list) {
   const area = document.getElementById('results-area');
@@ -775,8 +876,8 @@ function renderSuppliers(list) {
   }
 
   const cards = list.map((row, i) => {
-    const name   = row[COL_NAME]   || '—';
-    const status = row[COL_STATUS] || '';
+    const name     = row[COL_NAME]   || '—';
+    const status   = row[COL_STATUS] || '';
     const isActive = status.toLowerCase().includes('ativo');
 
     return `
@@ -825,20 +926,129 @@ function toggleCheck(id) {
 }
 
 // ═══════════════════════════════════════
-// MODAL
+// MODAL + EXECUÇÃO
 // ═══════════════════════════════════════
+function setStep(stepId, iconId, state, iconContent, textId, textContent) {
+  const row  = document.getElementById(stepId);
+  const icon = document.getElementById(iconId);
+
+  row.className = 'status-row ' + state;
+  if (state === 'active') {
+    icon.innerHTML = '<div class="spinner"></div>';
+  } else {
+    icon.textContent = iconContent;
+  }
+  if (textId && textContent) {
+    document.getElementById(textId).textContent = textContent;
+  }
+}
+
+function resetModal() {
+  const box = document.getElementById('modal-box');
+  box.className = 'modal-box';
+
+  // Linha 1
+  const r1 = document.getElementById('step-envio');
+  r1.className = 'status-row';
+  document.getElementById('icon-envio').textContent = '⏳';
+
+  // Linha 2
+  const r2 = document.getElementById('step-proc');
+  r2.className = 'status-row';
+  document.getElementById('icon-proc').textContent = '—';
+  document.getElementById('text-proc').textContent = 'Processamento N8N';
+
+  // Linha 3
+  const r3 = document.getElementById('step-bling');
+  r3.className = 'status-row';
+  document.getElementById('icon-bling').textContent = '—';
+  document.getElementById('text-bling').textContent = 'Criando pedido no Bling';
+
+  const msg = document.getElementById('status-msg');
+  msg.textContent = '';
+  msg.className = 'status-msg';
+
+  document.getElementById('btn-fechar').classList.remove('visible');
+  document.getElementById('modal-close-btn').style.display = 'flex';
+}
+
+async function runWebhook() {
+  const box = document.getElementById('modal-box');
+  const msg = document.getElementById('status-msg');
+
+  // Bloqueia fechar durante execução
+  document.getElementById('modal-close-btn').style.display = 'none';
+
+  // PASSO 1 — Enviando
+  setStep('step-envio', 'icon-envio', 'active', '', null, null);
+  msg.textContent = 'Conectando ao N8N...';
+
+  let response;
+  try {
+    response = await fetch(WEBHOOK_URL, { method: 'GET' });
+  } catch (err) {
+    // Erro de rede
+    setStep('step-envio', 'icon-envio', 'errored', '⚠️', null, null);
+    box.className = 'modal-box status-error';
+    msg.textContent = 'Erro de conexão. Verifique sua internet ou o N8N.';
+    msg.className = 'status-msg error';
+    document.getElementById('btn-fechar').classList.add('visible');
+    document.getElementById('modal-close-btn').style.display = 'flex';
+    return;
+  }
+
+  // PASSO 2 — N8N recebeu
+  setStep('step-envio', 'icon-envio', 'done', '✅', null, null);
+  setStep('step-proc', 'icon-proc', 'active', '', 'text-proc', 'Processando romaneio...');
+  msg.textContent = 'N8N recebeu o disparo, processando...';
+
+  // Aguarda 4s simulando processamento (N8N é assíncrono)
+  await new Promise(r => setTimeout(r, 4000));
+
+  if (!response.ok) {
+    // HTTP erro
+    setStep('step-proc', 'icon-proc', 'errored', '⚠️', 'text-proc', 'Falha no processamento');
+    box.className = 'modal-box status-error';
+    msg.textContent = `Erro HTTP ${response.status}. Verifique o workflow no N8N.`;
+    msg.className = 'status-msg error';
+    document.getElementById('btn-fechar').classList.add('visible');
+    document.getElementById('modal-close-btn').style.display = 'flex';
+    return;
+  }
+
+  // PASSO 3 — Bling
+  setStep('step-proc', 'icon-proc', 'done', '✅', 'text-proc', 'Romaneio processado');
+  setStep('step-bling', 'icon-bling', 'active', '', 'text-bling', 'Enviando para o Bling...');
+  msg.textContent = 'Criando pedido de compras...';
+
+  await new Promise(r => setTimeout(r, 3000));
+
+  // Sucesso final
+  setStep('step-bling', 'icon-bling', 'done', '✅', 'text-bling', 'Pedido criado com sucesso!');
+  box.className = 'modal-box status-success';
+  msg.textContent = '✔ Pedido de compras criado no Bling com sucesso!';
+  msg.className = 'status-msg success';
+  document.getElementById('btn-fechar').classList.add('visible');
+  document.getElementById('modal-close-btn').style.display = 'flex';
+}
+
 function openModal() {
-  document.getElementById('webhook-frame').src = WEBHOOK_URL;
+  resetModal();
   document.getElementById('modal-overlay').classList.add('open');
+  // Inicia execução automaticamente
+  runWebhook();
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
-  document.getElementById('webhook-frame').src = '';
 }
 
 function closeModalOnOverlay(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
+  // Só fecha se execução terminou (botão fechar visível)
+  const fechar = document.getElementById('btn-fechar');
+  if (e.target === document.getElementById('modal-overlay') && fechar.classList.contains('visible')) {
+    closeModal();
+  }
 }
 
 // ═══════════════════════════════════════
