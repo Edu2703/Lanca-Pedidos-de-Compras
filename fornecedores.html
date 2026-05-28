@@ -511,6 +511,32 @@
     animation: spin 0.8s linear infinite;
   }
 
+  /* ══ NOVO COMPONENTE: LOADING BAR ══ */
+  .loading-bar-container {
+    width: 100%;
+    height: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    display: none;
+    margin-top: 4px;
+  }
+
+  .loading-bar-progress {
+    width: 40%;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    animation: loadingBarAnim 1.6s infinite ease-in-out;
+  }
+
+  @keyframes loadingBarAnim {
+    0% { transform: translateX(-150%); }
+    50% { transform: translateX(100%); width: 60%; }
+    100% { transform: translateX(250%); }
+  }
+
   .status-msg {
     font-size: 13px;
     color: var(--muted);
@@ -520,7 +546,7 @@
     transition: color 0.3s;
   }
 
-  .status-msg.success { color: var(--success); }
+  .status-msg.success { color: var(--success); font-weight: 600; font-size: 15px; }
   .status-msg.error   { color: var(--danger); }
 
   .modal-footer {
@@ -641,7 +667,6 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">▣ FORNECEDORES</div>
@@ -659,7 +684,6 @@
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <header>
     <div class="header-brand">▣ Fornecedores</div>
@@ -707,7 +731,6 @@
   </main>
 </div>
 
-<!-- MODAL STATUS -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
   <div class="modal-box" id="modal-box">
     <div class="modal-header">
@@ -717,22 +740,23 @@
 
     <div class="status-panel">
 
-      <!-- Linha 1: Enviando -->
       <div class="status-row" id="step-envio">
         <div class="status-row-icon" id="icon-envio">⏳</div>
         <div class="status-row-text">Aguardando disparo...</div>
       </div>
 
-      <!-- Linha 2: Processando -->
       <div class="status-row" id="step-proc">
         <div class="status-row-icon" id="icon-proc">—</div>
         <div class="status-row-text" id="text-proc">Processamento N8N</div>
       </div>
 
-      <!-- Linha 3: Bling -->
       <div class="status-row" id="step-bling">
         <div class="status-row-icon" id="icon-bling">—</div>
         <div class="status-row-text" id="text-bling">Criando pedido no Bling</div>
+      </div>
+
+      <div class="loading-bar-container" id="modal-loading-bar">
+        <div class="loading-bar-progress"></div>
       </div>
 
       <div class="status-msg" id="status-msg"></div>
@@ -751,7 +775,9 @@
 const SHEET_ID        = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
 const SHEET_SUPPLIERS = 'Lista de fornecedores';
 const SHEET_USERS     = 'USUÁRIOS';
-const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/3746f5da-e2ce-4d32-81b6-77b9b21efc3e';
+
+// SITUAÇÃO 1: Link do Webhook Atualizado
+const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/b0242122-1d55-4c4c-9c3a-7a858b9d9c95';
 
 const COL_NAME   = 0;
 const COL_STATUS = 1;
@@ -805,7 +831,7 @@ async function loadData() {
 async function doLogin() {
   const user  = document.getElementById('login-user').value.trim();
   const pass  = document.getElementById('login-pass').value.trim();
-  const btn   = document.getElementById('btn-login');
+  const btn    = document.getElementById('btn-login');
   const errEl = document.getElementById('login-error');
 
   if (!user || !pass) { showError('Preencha usuário e senha.'); return; }
@@ -968,6 +994,9 @@ function resetModal() {
   msg.textContent = '';
   msg.className = 'status-msg';
 
+  // Esconde barra de progresso no reset
+  document.getElementById('modal-loading-bar').style.display = 'none';
+
   document.getElementById('btn-fechar').classList.remove('visible');
   document.getElementById('modal-close-btn').style.display = 'flex';
 }
@@ -975,22 +1004,28 @@ function resetModal() {
 async function runWebhook() {
   const box = document.getElementById('modal-box');
   const msg = document.getElementById('status-msg');
+  const loadingBar = document.getElementById('modal-loading-bar');
 
   // Bloqueia fechar durante execução
   document.getElementById('modal-close-btn').style.display = 'none';
 
+  // SITUAÇÃO 2: Ativa e exibe a barra com o dizer "Lançando pedido de Compras."
+  loadingBar.style.display = 'block';
+  msg.textContent = 'Lançando pedido de Compras.';
+  msg.className = 'status-msg';
+
   // PASSO 1 — Enviando
   setStep('step-envio', 'icon-envio', 'active', '', null, null);
-  msg.textContent = 'Conectando ao N8N...';
 
   let response;
   try {
     response = await fetch(WEBHOOK_URL, { method: 'GET' });
   } catch (err) {
-    // Erro de rede
+    // SITUAÇÃO 3: Trata erro de rede/conexão
+    loadingBar.style.display = 'none';
     setStep('step-envio', 'icon-envio', 'errored', '⚠️', null, null);
     box.className = 'modal-box status-error';
-    msg.textContent = 'Erro de conexão. Verifique sua internet ou o N8N.';
+    msg.textContent = 'Erro de conexão: Não foi possível alcançar o servidor N8N.';
     msg.className = 'status-msg error';
     document.getElementById('btn-fechar').classList.add('visible');
     document.getElementById('modal-close-btn').style.display = 'flex';
@@ -1000,16 +1035,16 @@ async function runWebhook() {
   // PASSO 2 — N8N recebeu
   setStep('step-envio', 'icon-envio', 'done', '✅', null, null);
   setStep('step-proc', 'icon-proc', 'active', '', 'text-proc', 'Processando romaneio...');
-  msg.textContent = 'N8N recebeu o disparo, processando...';
 
   // Aguarda 4s simulando processamento (N8N é assíncrono)
   await new Promise(r => setTimeout(r, 4000));
 
   if (!response.ok) {
-    // HTTP erro
+    // SITUAÇÃO 3: Trata HTTP Erro do n8n
+    loadingBar.style.display = 'none';
     setStep('step-proc', 'icon-proc', 'errored', '⚠️', 'text-proc', 'Falha no processamento');
     box.className = 'modal-box status-error';
-    msg.textContent = `Erro HTTP ${response.status}. Verifique o workflow no N8N.`;
+    msg.textContent = `Erro no workflow (Status HTTP ${response.status}).`;
     msg.className = 'status-msg error';
     document.getElementById('btn-fechar').classList.add('visible');
     document.getElementById('modal-close-btn').style.display = 'flex';
@@ -1019,15 +1054,37 @@ async function runWebhook() {
   // PASSO 3 — Bling
   setStep('step-proc', 'icon-proc', 'done', '✅', 'text-proc', 'Romaneio processado');
   setStep('step-bling', 'icon-bling', 'active', '', 'text-bling', 'Enviando para o Bling...');
-  msg.textContent = 'Criando pedido de compras...';
 
   await new Promise(r => setTimeout(r, 3000));
 
-  // Sucesso final
-  setStep('step-bling', 'icon-bling', 'done', '✅', 'text-bling', 'Pedido criado com sucesso!');
-  box.className = 'modal-box status-success';
-  msg.textContent = '✔ Pedido de compras criado no Bling com sucesso!';
-  msg.className = 'status-msg success';
+  // Tenta ler e mapear o retorno do JSON para pegar o número do pedido
+  try {
+    const resData = await response.json();
+    
+    // Procura a informação dentro da estrutura: resData[0].data.numero
+    if (resData && resData[0] && resData[0].data && resData[0].data.numero) {
+      const numeroPedido = resData[0].data.numero;
+      
+      // SITUAÇÃO 3: Sucesso Dinâmico obtendo o número enviado pelo JSON
+      loadingBar.style.display = 'none';
+      setStep('step-bling', 'icon-bling', 'done', '✅', 'text-bling', 'Pedido criado!');
+      box.className = 'modal-box status-success';
+      msg.textContent = `Pedido nº ${numeroPedido} Criado com sucesso`;
+      msg.className = 'status-msg success';
+    } else {
+      // Se a estrutura retornar diferente do esperado, joga o fallback de erro
+      throw new Error("Estrutura do JSON inválida");
+    }
+
+  } catch (jsonError) {
+    // SITUAÇÃO 3: Caso dê erro de parse ou não ache o número do pedido no JSON
+    loadingBar.style.display = 'none';
+    setStep('step-bling', 'icon-bling', 'errored', '⚠️', 'text-bling', 'Erro ao ler dados');
+    box.className = 'modal-box status-error';
+    msg.textContent = 'Erro ao processar resposta do Bling: número do pedido não localizado.';
+    msg.className = 'status-msg error';
+  }
+
   document.getElementById('btn-fechar').classList.add('visible');
   document.getElementById('modal-close-btn').style.display = 'flex';
 }
