@@ -41,117 +41,13 @@
     z-index: 0;
   }
 
-  /* ══ AUTH PANEL (Antigo Login, renomeado p/ evitar AdBlock) ══ */
-  #auth-panel {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
-  }
-
-  .auth-card {
-    width: 100%;
-    max-width: 400px;
-    padding: 48px 40px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    position: relative;
-  }
-
-  .auth-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent);
-  }
-
-  .auth-brand {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 32px;
-  }
-
-  .auth-heading {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 8px;
-  }
-
-  .auth-subtitle {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 40px;
-  }
-
-  .field-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-    display: block;
-  }
-
-  .field-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    padding: 12px 16px;
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 20px;
-    border-radius: 2px;
-  }
-
-  .field-input:focus { border-color: var(--accent); }
-
-  .btn-primary {
-    width: 100%;
-    background: var(--accent);
-    color: #0f0f0f;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 14px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 4px;
-    border-radius: 2px;
-  }
-
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:active { transform: scale(0.99); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .auth-alert {
-    margin-top: 16px;
-    padding: 10px 14px;
-    background: rgba(255,71,71,0.1);
-    border: 1px solid rgba(255,71,71,0.3);
-    color: var(--danger);
-    font-size: 13px;
-    display: none;
-    border-radius: 2px;
-  }
-
   /* ══ APP ══ */
-  #app { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  #app { 
+    display: block; /* Agora o app já nasce visível */
+    min-height: 100vh; 
+    position: relative; 
+    z-index: 1; 
+  }
 
   header {
     border-bottom: 1px solid var(--border);
@@ -175,24 +71,6 @@
     text-transform: uppercase;
     color: var(--accent);
   }
-
-  .header-user { display: flex; align-items: center; gap: 12px; }
-  .user-badge { font-size: 12px; color: var(--muted); }
-  .user-name { color: var(--text); font-weight: 500; }
-
-  .btn-logout {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 2px;
-  }
-
-  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
 
   main {
     max-width: 960px;
@@ -279,22 +157,6 @@
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
-  }
-
-  /* ══ TABLE HEADER ══ */
-  .table-header {
-    display: grid;
-    grid-template-columns: 1fr 120px;
-    gap: 16px;
-    padding: 8px 24px;
-    margin-bottom: 8px;
-  }
-
-  .table-header-label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
   }
 
   /* ══ CARDS ══ */
@@ -667,30 +529,9 @@
 </head>
 <body>
 
-<div id="auth-panel">
-  <div class="auth-card">
-    <div class="auth-brand">▣ FORNECEDORES</div>
-    <h1 class="auth-heading">Bem-vindo<br>de volta.</h1>
-    <p class="auth-subtitle">Faça login para acessar a lista de fornecedores.</p>
-
-    <label class="field-label" for="auth-user">Usuário</label>
-    <input class="field-input" type="text" id="auth-user" placeholder="seu usuário" autocomplete="username">
-
-    <label class="field-label" for="auth-pass">Senha</label>
-    <input class="field-input" type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password">
-
-    <button class="btn-primary" id="btn-auth" onclick="doLogin()">Entrar</button>
-    <div class="auth-alert" id="auth-alert"></div>
-  </div>
-</div>
-
 <div id="app">
   <header>
     <div class="header-brand">▣ Fornecedores</div>
-    <div class="header-user">
-      <span class="user-badge">Logado como <span class="user-name" id="logged-name"></span></span>
-      <button class="btn-logout" onclick="doLogout()">Sair</button>
-    </div>
   </header>
 
   <main>
@@ -774,7 +615,6 @@
 // ═══════════════════════════════════════
 const SHEET_ID        = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
 const SHEET_SUPPLIERS = 'Lista de fornecedores';
-const SHEET_USERS     = 'USUÁRIOS';
 const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/b0242122-1d55-4c4c-9c3a-7a858b9d9c95';
 
 const COL_NAME   = 0;
@@ -784,12 +624,9 @@ const COL_STATUS = 1;
 // ESTADO
 // ═══════════════════════════════════════
 let allSuppliers = [];
-let allUsers     = [];
-let dataLoaded   = false;
-let currentUser  = null;
 
 // ═══════════════════════════════════════
-// BUSCAR PLANILHA
+// INICIALIZAÇÃO E BUSCA DE DADOS
 // ═══════════════════════════════════════
 async function fetchSheet(sheetName) {
   const url  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
@@ -808,84 +645,29 @@ function tableToRows(table) {
   );
 }
 
-async function loadData() {
-  const [suppTable, usersTable] = await Promise.all([
-    fetchSheet(SHEET_SUPPLIERS),
-    fetchSheet(SHEET_USERS)
-  ]);
-
-  const suppRows = tableToRows(suppTable);
-  allSuppliers = suppRows.slice(1).filter(row => row[COL_NAME] && row[COL_NAME].trim() !== '');
-
-  const userRows = tableToRows(usersTable);
-  allUsers = userRows.slice(1).filter(row => row[0] && row[0].trim() !== '');
-
-  dataLoaded = true;
-}
-
-// ═══════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════
-async function doLogin() {
-  const user  = document.getElementById('auth-user').value.trim();
-  const pass  = document.getElementById('auth-pass').value.trim();
-  const btn    = document.getElementById('btn-auth');
-  const errEl = document.getElementById('auth-alert');
-
-  if (!user || !pass) { showError('Preencha usuário e senha.'); return; }
-
-  btn.disabled    = true;
-  btn.textContent = 'Verificando...';
-  errEl.style.display = 'none';
-
+// Carrega os dados assim que a página abre
+window.onload = async function() {
   try {
-    if (!dataLoaded) await loadData();
-
-    const found = allUsers.find(row =>
-      row[0] && row[1] &&
-      row[0].toLowerCase() === user.toLowerCase() &&
-      row[1] === pass
-    );
-
-    if (found) {
-      currentUser = found[0];
-      document.getElementById('logged-name').textContent = currentUser;
-      document.getElementById('auth-panel').style.display = 'none';
-      document.getElementById('app').style.display        = 'block';
-      renderAll();
-      document.getElementById('search-input').focus();
-    } else {
-      showError('Usuário ou senha incorretos.');
-    }
-  } catch (e) {
-    showError('Erro ao carregar dados. Verifique se a planilha está pública.');
-    console.error(e);
+    const suppTable = await fetchSheet(SHEET_SUPPLIERS);
+    const suppRows = tableToRows(suppTable);
+    
+    // Filtra a lista, pulando o cabeçalho
+    allSuppliers = suppRows.slice(1).filter(row => row[COL_NAME] && row[COL_NAME].trim() !== '');
+    renderSuppliers(allSuppliers);
+  } catch (error) {
+    document.getElementById('results-area').innerHTML = `
+      <div class="state-box">
+        <span class="state-icon">⚠️</span>
+        <div class="state-title">Erro ao carregar dados</div>
+        <div class="state-desc">Verifique se a planilha está pública.</div>
+      </div>`;
+    console.error("Erro ao puxar dados da planilha:", error);
   }
-
-  btn.disabled    = false;
-  btn.textContent = 'Entrar';
-}
-
-function showError(msg) {
-  const el = document.getElementById('auth-alert');
-  el.textContent   = msg;
-  el.style.display = 'block';
-}
-
-function doLogout() {
-  currentUser = null;
-  document.getElementById('auth-panel').style.display   = 'flex';
-  document.getElementById('app').style.display          = 'none';
-  document.getElementById('auth-user').value            = '';
-  document.getElementById('auth-pass').value            = '';
-  document.getElementById('search-input').value         = '';
-}
+};
 
 // ═══════════════════════════════════════
 // RENDERIZAR
 // ═══════════════════════════════════════
-function renderAll() { renderSuppliers(allSuppliers); }
-
 function renderSuppliers(list) {
   const area = document.getElementById('results-area');
 
@@ -950,7 +732,7 @@ function toggleCheck(id) {
 }
 
 // ═══════════════════════════════════════
-// MODAL + EXECUÇÃO
+// MODAL + EXECUÇÃO DO WEBHOOK
 // ═══════════════════════════════════════
 function setStep(stepId, iconId, state, iconContent, textId, textContent) {
   const row  = document.getElementById(stepId);
@@ -1058,4 +840,25 @@ async function runWebhook() {
     if (numeroPedido) {
       loadingBar.style.display = 'none';
       setStep('step-bling', 'icon-bling', 'done', '✅', 'text-bling', 'Pedido criado!');
-      box.
+      box.className = 'modal-box status-success';
+      msg.textContent = `Pedido nº ${numeroPedido} Criado com sucesso`;
+      msg.className = 'status-msg success';
+    } else {
+      throw new Error("Estrutura do JSON não contém o campo numero");
+    }
+
+  } catch (jsonError) {
+    loadingBar.style.display = 'none';
+    setStep('step-bling', 'icon-bling', 'errored', '⚠️', 'text-bling', 'Erro na leitura');
+    box.className = 'modal-box status-error';
+    msg.textContent = 'Erro ao processar a resposta: O pedido pode ter sido criado, mas o número não foi retornado corretamente.';
+    msg.className = 'status-msg error';
+    console.error("Retorno do n8n:", jsonError);
+  }
+
+  document.getElementById('btn-fechar').classList.add('visible');
+  document.getElementById('modal-close-btn').style.display = 'flex';
+}
+
+function openModal() {
+  resetModal();
