@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista de Fornecedores</title>
+<title>Novo Pedido de Compras</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -41,7 +41,7 @@
     z-index: 0;
   }
 
-  /* ══ AUTH PANEL (Antigo Login, renomeado p/ evitar AdBlock) ══ */
+  /* ══ AUTH PANEL ══ */
   #auth-panel {
     position: fixed;
     inset: 0;
@@ -195,191 +195,254 @@
   .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
 
   main {
-    max-width: 960px;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 48px 24px;
+    padding: 64px 24px;
   }
 
-  .page-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
+  /* ══ PAGE HEADER ══ */
+  .page-header { margin-bottom: 48px; }
 
   .page-title {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
     font-size: 42px;
     line-height: 1;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
 
   .page-title span { color: var(--accent); }
   .page-subtitle { color: var(--muted); font-size: 15px; }
 
-  .btn-webhook {
-    background: var(--accent);
-    color: #0f0f0f;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 12px 24px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    border-radius: 2px;
-    white-space: nowrap;
-  }
-
-  .btn-webhook:hover { opacity: 0.88; }
-  .btn-webhook:active { transform: scale(0.99); }
-  .btn-webhook:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* ══ SEARCH ══ */
-  .search-wrapper { position: relative; margin-bottom: 24px; }
-
-  .search-icon {
-    position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 18px;
-    pointer-events: none;
-  }
-
-  #search-input {
-    width: 100%;
+  /* ══ FORM CARD ══ */
+  .form-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 2px;
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    padding: 16px 18px 16px 52px;
-    outline: none;
-    transition: border-color 0.2s;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    padding: 40px;
+    position: relative;
+    margin-bottom: 24px;
   }
 
-  #search-input:focus {
+  .form-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .form-section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ══ SELECT FORNECEDOR ══ */
+  .select-wrapper {
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 16px;
+  }
+
+  #select-fornecedor {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 14px 44px 14px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    border-radius: 2px;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  #select-fornecedor:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(232,255,71,0.08);
   }
 
-  #search-input::placeholder {
-    color: var(--muted);
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  /* ══ TABLE HEADER ══ */
-  .table-header {
-    display: grid;
-    grid-template-columns: 1fr 120px;
-    gap: 16px;
-    padding: 8px 24px;
-    margin-bottom: 8px;
-  }
-
-  .table-header-label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  /* ══ CARDS ══ */
-  #results-area { min-height: 200px; }
-
-  .result-count {
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  .result-count span { color: var(--accent); font-weight: 600; }
-
-  .supplier-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 18px 24px;
-    margin-bottom: 8px;
-    display: grid;
-    grid-template-columns: 1fr 120px;
-    gap: 16px;
-    align-items: center;
-    transition: border-color 0.2s, transform 0.15s;
-    animation: fadeIn 0.25s ease both;
-  }
-
-  .supplier-card:hover {
-    border-color: rgba(232,255,71,0.3);
-    transform: translateX(3px);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .supplier-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.03em;
+  #select-fornecedor option {
+    background: var(--surface2);
     color: var(--text);
+    padding: 8px;
   }
 
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  #select-fornecedor option:disabled {
+    color: var(--muted);
+  }
+
+  .select-hint {
     font-size: 12px;
-    font-weight: 500;
-    color: var(--success);
+    color: var(--muted);
+    margin-top: 6px;
+    margin-bottom: 0;
   }
 
-  .status-dot {
-    width: 7px;
-    height: 7px;
+  /* Fornecedor selecionado — badge de confirmação */
+  .fornecedor-badge {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(71,255,154,0.06);
+    border: 1px solid rgba(71,255,154,0.25);
+    border-radius: 2px;
+    margin-top: 12px;
+  }
+
+  .fornecedor-badge.visible { display: flex; }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--success);
     flex-shrink: 0;
   }
 
-  .status-badge.inactive { color: var(--muted); }
-  .status-badge.inactive .status-dot { background: var(--muted); }
-
-  /* ══ ESTADOS ══ */
-  .state-box {
-    text-align: center;
-    padding: 64px 24px;
-    color: var(--muted);
-  }
-
-  .state-icon { font-size: 48px; margin-bottom: 16px; display: block; }
-
-  .state-title {
+  .badge-text {
     font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--success);
+    letter-spacing: 0.03em;
   }
 
-  .state-desc { font-size: 14px; }
+  .badge-id {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* ══ CHECKLIST ══ */
+  .checklist-section { margin-bottom: 0; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.2s;
+    user-select: none;
+    margin-bottom: 10px;
+  }
+
+  .check-item:last-child { margin-bottom: 0; }
+  .check-item:hover { border-color: rgba(232,255,71,0.3); }
+
+  .check-item.checked {
+    border-color: rgba(71,255,154,0.4);
+    background: rgba(71,255,154,0.04);
+  }
+
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.2s;
+    color: transparent;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--success);
+    border-color: var(--success);
+    color: #0f0f0f;
+    font-weight: 700;
+  }
+
+  .check-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  .check-item.checked .check-text { color: var(--text); }
+
+  /* ══ BOTÃO DISPARAR ══ */
+  .action-area { margin-top: 32px; }
+
+  .btn-webhook {
+    width: 100%;
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 18px 24px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-webhook:hover { opacity: 0.88; }
+  .btn-webhook:active { transform: scale(0.99); }
+
+  .btn-webhook:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--muted);
+    transform: none;
+  }
+
+  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
+  .btn-webhook:not(:disabled):hover .btn-arrow { transform: translateX(4px); }
+
+  /* Hint de validação */
+  .validation-hint {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 12px;
+    min-height: 16px;
+    transition: color 0.2s;
+  }
 
   /* ══ MODAL ══ */
   .modal-overlay {
@@ -455,12 +518,18 @@
 
   .modal-close:hover { border-color: var(--danger); color: var(--danger); }
 
-  /* ══ STATUS PANEL ══ */
+  .modal-fornecedor-info {
+    padding: 12px 24px 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .modal-fornecedor-info strong { color: var(--accent); font-size: 13px; }
+
   .status-panel {
-    padding: 40px 32px 36px;
+    padding: 28px 32px 28px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
   }
 
   .status-row {
@@ -498,7 +567,6 @@
   .status-row.done    .status-row-text { color: var(--success); }
   .status-row.errored .status-row-text { color: var(--danger); }
 
-  /* Spinner */
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .spinner {
@@ -511,7 +579,6 @@
     animation: spin 0.8s linear infinite;
   }
 
-  /* Loading Bar */
   .loading-bar-container {
     width: 100%;
     height: 6px;
@@ -574,104 +641,23 @@
   .btn-fechar:hover { border-color: var(--text); color: var(--text); }
   .btn-fechar.visible { display: block; }
 
-  /* ══ CHECKLIST ══ */
-  .checklist-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 16px 24px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .checklist-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-
-  .checklist-items {
-    display: flex;
-    gap: 12px;
-    flex: 1;
-    flex-wrap: wrap;
-  }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 10px 16px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    transition: all 0.2s;
-    user-select: none;
-    flex: 1;
-    min-width: 180px;
-  }
-
-  .check-item:hover { border-color: rgba(232,255,71,0.3); }
-
-  .check-item.checked {
-    border-color: var(--success);
-    background: rgba(71,255,154,0.06);
-  }
-
-  .check-box {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--border);
-    border-radius: 2px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    transition: all 0.2s;
-    color: transparent;
-  }
-
-  .check-item.checked .check-box {
-    background: var(--success);
-    border-color: var(--success);
-    color: #0f0f0f;
-  }
-
-  .check-text {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--muted);
-    transition: color 0.2s;
-    line-height: 1.3;
-  }
-
-  .check-item.checked .check-text { color: var(--text); }
-
   /* ══ RESPONSIVE ══ */
   @media (max-width: 640px) {
     header { padding: 0 16px; }
     main { padding: 32px 16px; }
     .page-title { font-size: 30px; }
-    .page-header { flex-direction: column; align-items: flex-start; }
-    .btn-webhook { width: 100%; text-align: center; }
-    .checklist-bar { flex-direction: column; align-items: flex-start; }
+    .form-card { padding: 28px 20px; }
   }
 </style>
 </head>
 <body>
 
+<!-- AUTH -->
 <div id="auth-panel">
   <div class="auth-card">
-    <div class="auth-brand">▣ FORNECEDORES</div>
+    <div class="auth-brand">▣ COMPRAS</div>
     <h1 class="auth-heading">Bem-vindo<br>de volta.</h1>
-    <p class="auth-subtitle">Faça login para acessar a lista de fornecedores.</p>
+    <p class="auth-subtitle">Faça login para criar pedidos de compras.</p>
 
     <label class="field-label" for="auth-user">Usuário</label>
     <input class="field-input" type="text" id="auth-user" placeholder="seu usuário" autocomplete="username">
@@ -684,9 +670,10 @@
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <header>
-    <div class="header-brand">▣ Fornecedores</div>
+    <div class="header-brand">▣ Pedidos de Compras</div>
     <div class="header-user">
       <span class="user-badge">Logado como <span class="user-name" id="logged-name"></span></span>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
@@ -695,61 +682,77 @@
 
   <main>
     <div class="page-header">
-      <div>
-        <h1 class="page-title">Lista de<br><span>Fornecedores</span></h1>
-        <p class="page-subtitle">Busque e consulte os fornecedores cadastrados.</p>
-      </div>
-      <button class="btn-webhook" id="btn-webhook" onclick="openModal()" disabled>＋ Criar Pedido de Compras no Bling</button>
+      <h1 class="page-title">Novo Pedido<br><span>de Compras</span></h1>
+      <p class="page-subtitle">Selecione o fornecedor e confirme antes de disparar.</p>
     </div>
 
-    <div class="checklist-bar">
-      <div class="checklist-title">Antes de criar o pedido:</div>
-      <div class="checklist-items">
+    <!-- CARD: SELEÇÃO DE FORNECEDOR -->
+    <div class="form-card">
+      <div class="form-section-label">01 · Fornecedor</div>
+
+      <label class="field-label" for="select-fornecedor">Selecione o fornecedor do romaneio</label>
+
+      <div class="select-wrapper">
+        <select id="select-fornecedor" onchange="onFornecedorChange(this)">
+          <option value="" disabled selected>Carregando fornecedores...</option>
+        </select>
+      </div>
+
+      <p class="select-hint">O ID será enviado automaticamente para o fluxo.</p>
+
+      <div class="fornecedor-badge" id="fornecedor-badge">
+        <div class="badge-dot"></div>
+        <div class="badge-text" id="badge-nome">—</div>
+        <div class="badge-id" id="badge-id">—</div>
+      </div>
+    </div>
+
+    <!-- CARD: CHECKLIST -->
+    <div class="form-card">
+      <div class="form-section-label">02 · Confirmações</div>
+
+      <div class="checklist-section">
         <div class="check-item" id="check1" onclick="toggleCheck('check1')">
           <div class="check-box">✓</div>
-          <div class="check-text">Subiu o arquivo no Drive?</div>
+          <div class="check-text">O romaneio já foi subido na pasta do Drive?</div>
         </div>
         <div class="check-item" id="check2" onclick="toggleCheck('check2')">
           <div class="check-box">✓</div>
-          <div class="check-text">O fornecedor está na lista abaixo?</div>
+          <div class="check-text">O fornecedor selecionado acima está correto?</div>
         </div>
       </div>
     </div>
 
-    <div class="search-wrapper">
-      <span class="search-icon">⌕</span>
-      <input type="text" id="search-input" placeholder="Buscar fornecedor..." oninput="onSearch(this.value)">
-    </div>
-
-    <div id="results-area">
-      <div class="state-box">
-        <span class="state-icon">🏭</span>
-        <div class="state-title">Carregando fornecedores...</div>
-        <div class="state-desc">Aguarde um momento.</div>
-      </div>
+    <!-- BOTÃO -->
+    <div class="action-area">
+      <button class="btn-webhook" id="btn-webhook" onclick="openModal()" disabled>
+        Criar Pedido no Bling
+        <span class="btn-arrow">→</span>
+      </button>
+      <div class="validation-hint" id="validation-hint">Selecione um fornecedor e marque as confirmações.</div>
     </div>
   </main>
 </div>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
   <div class="modal-box" id="modal-box">
     <div class="modal-header">
-      <div class="modal-title">Criar Pedido de Compras no Bling</div>
+      <div class="modal-title">Criando Pedido no Bling</div>
       <button class="modal-close" id="modal-close-btn" onclick="closeModal()">✕</button>
     </div>
 
-    <div class="status-panel">
+    <div class="modal-fornecedor-info" id="modal-forn-info"></div>
 
+    <div class="status-panel">
       <div class="status-row" id="step-envio">
         <div class="status-row-icon" id="icon-envio">⏳</div>
         <div class="status-row-text">Aguardando disparo...</div>
       </div>
-
       <div class="status-row" id="step-proc">
         <div class="status-row-icon" id="icon-proc">—</div>
         <div class="status-row-text" id="text-proc">Processamento N8N</div>
       </div>
-
       <div class="status-row" id="step-bling">
         <div class="status-row-icon" id="icon-bling">—</div>
         <div class="status-row-text" id="text-bling">Criando pedido no Bling</div>
@@ -772,27 +775,28 @@
 // ═══════════════════════════════════════
 // CONFIGURAÇÃO
 // ═══════════════════════════════════════
-const SHEET_ID        = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
-const SHEET_SUPPLIERS = 'Lista de fornecedores';
-const SHEET_USERS     = 'USUÁRIOS';
-const WEBHOOK_URL     = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/b0242122-1d55-4c4c-9c3a-7a858b9d9c95';
+const SHEET_ID_USUARIOS  = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
+const SHEET_USUARIOS     = 'USUÁRIOS';
 
-const COL_NAME   = 0;
-const COL_STATUS = 1;
+// Planilha com aba Fornecedores_EDU (colunas: ID, Nome, Fantasia)
+const SHEET_ID_FORN      = '11NUO5QZSbxYQBHoEaZ3AenJ68JJ1FAx22bh4Wc3FNXs';
+const SHEET_FORN         = 'Fornecedores_EDU';
+
+const WEBHOOK_URL = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/b0242122-1d55-4c4c-9c3a-7a858b9d9c95';
 
 // ═══════════════════════════════════════
 // ESTADO
 // ═══════════════════════════════════════
-let allSuppliers = [];
-let allUsers     = [];
-let dataLoaded   = false;
-let currentUser  = null;
+let allUsers       = [];
+let allFornecedores = [];
+let currentUser    = null;
+let selectedForn   = null; // { id, nome }
 
 // ═══════════════════════════════════════
 // BUSCAR PLANILHA
 // ═══════════════════════════════════════
-async function fetchSheet(sheetName) {
-  const url  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+async function fetchSheet(sheetId, sheetName) {
+  const url  = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
   const res  = await fetch(url);
   const text = await res.text();
   const json = JSON.parse(text.substring(47, text.length - 2));
@@ -808,19 +812,25 @@ function tableToRows(table) {
   );
 }
 
-async function loadData() {
-  const [suppTable, usersTable] = await Promise.all([
-    fetchSheet(SHEET_SUPPLIERS),
-    fetchSheet(SHEET_USERS)
-  ]);
+async function loadUsers() {
+  const table = await fetchSheet(SHEET_ID_USUARIOS, SHEET_USUARIOS);
+  const rows  = tableToRows(table);
+  allUsers = rows.slice(1).filter(r => r[0]);
+}
 
-  const suppRows = tableToRows(suppTable);
-  allSuppliers = suppRows.slice(1).filter(row => row[COL_NAME] && row[COL_NAME].trim() !== '');
-
-  const userRows = tableToRows(usersTable);
-  allUsers = userRows.slice(1).filter(row => row[0] && row[0].trim() !== '');
-
-  dataLoaded = true;
+async function loadFornecedores() {
+  const table = await fetchSheet(SHEET_ID_FORN, SHEET_FORN);
+  const rows  = tableToRows(table);
+  // Espera colunas: 0=ID, 1=? , 2=Nome (ou 1=Nome dependendo da planilha)
+  // Filtra linhas com ID e Nome válidos
+  allFornecedores = rows.slice(1)
+    .filter(r => r[0] && r[0].trim() !== '')
+    .map(r => ({
+      id:      r[0].trim(),
+      nome:    r[2] && r[2].trim() ? r[2].trim() : (r[1] && r[1].trim() ? r[1].trim() : r[0]),
+      fantasia: r[3] ? r[3].trim() : ''
+    }))
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
 // ═══════════════════════════════════════
@@ -829,17 +839,17 @@ async function loadData() {
 async function doLogin() {
   const user  = document.getElementById('auth-user').value.trim();
   const pass  = document.getElementById('auth-pass').value.trim();
-  const btn    = document.getElementById('btn-auth');
+  const btn   = document.getElementById('btn-auth');
   const errEl = document.getElementById('auth-alert');
 
-  if (!user || !pass) { showError('Preencha usuário e senha.'); return; }
+  if (!user || !pass) { showAuthError('Preencha usuário e senha.'); return; }
 
   btn.disabled    = true;
   btn.textContent = 'Verificando...';
   errEl.style.display = 'none';
 
   try {
-    if (!dataLoaded) await loadData();
+    await loadUsers();
 
     const found = allUsers.find(row =>
       row[0] && row[1] &&
@@ -852,13 +862,12 @@ async function doLogin() {
       document.getElementById('logged-name').textContent = currentUser;
       document.getElementById('auth-panel').style.display = 'none';
       document.getElementById('app').style.display        = 'block';
-      renderAll();
-      document.getElementById('search-input').focus();
+      await initFornecedores();
     } else {
-      showError('Usuário ou senha incorretos.');
+      showAuthError('Usuário ou senha incorretos.');
     }
   } catch (e) {
-    showError('Erro ao carregar dados. Verifique se a planilha está pública.');
+    showAuthError('Erro ao carregar dados. Verifique conexão.');
     console.error(e);
   }
 
@@ -866,87 +875,95 @@ async function doLogin() {
   btn.textContent = 'Entrar';
 }
 
-function showError(msg) {
+function showAuthError(msg) {
   const el = document.getElementById('auth-alert');
   el.textContent   = msg;
   el.style.display = 'block';
 }
 
 function doLogout() {
-  currentUser = null;
-  document.getElementById('auth-panel').style.display   = 'flex';
-  document.getElementById('app').style.display          = 'none';
-  document.getElementById('auth-user').value            = '';
-  document.getElementById('auth-pass').value            = '';
-  document.getElementById('search-input').value         = '';
+  currentUser  = null;
+  selectedForn = null;
+  document.getElementById('auth-panel').style.display = 'flex';
+  document.getElementById('app').style.display        = 'none';
+  document.getElementById('auth-user').value          = '';
+  document.getElementById('auth-pass').value          = '';
+  // Reset checks
+  document.getElementById('check1').classList.remove('checked');
+  document.getElementById('check2').classList.remove('checked');
+  document.getElementById('btn-webhook').disabled = true;
 }
 
 // ═══════════════════════════════════════
-// RENDERIZAR
+// FORNECEDORES
 // ═══════════════════════════════════════
-function renderAll() { renderSuppliers(allSuppliers); }
+async function initFornecedores() {
+  const sel = document.getElementById('select-fornecedor');
+  sel.innerHTML = '<option value="" disabled selected>Carregando...</option>';
 
-function renderSuppliers(list) {
-  const area = document.getElementById('results-area');
-
-  if (list.length === 0) {
-    area.innerHTML = `
-      <div class="state-box">
-        <span class="state-icon">🔍</span>
-        <div class="state-title">Nenhum fornecedor encontrado</div>
-        <div class="state-desc">Tente outro termo de busca.</div>
-      </div>`;
-    return;
+  try {
+    await loadFornecedores();
+    populateSelect();
+  } catch(e) {
+    sel.innerHTML = '<option value="" disabled selected>Erro ao carregar — recarregue a página</option>';
+    console.error(e);
   }
-
-  const cards = list.map((row, i) => {
-    const name     = row[COL_NAME]   || '—';
-    const status   = row[COL_STATUS] || '';
-    const isActive = status.toLowerCase().includes('ativo');
-
-    return `
-      <div class="supplier-card" style="animation-delay:${i * 0.03}s">
-        <div class="supplier-name">${name}</div>
-        <div class="status-badge ${isActive ? '' : 'inactive'}">
-          <span class="status-dot"></span>
-          ${isActive ? 'Ativo' : (status || 'Inativo')}
-        </div>
-      </div>`;
-  }).join('');
-
-  area.innerHTML = `
-    <div class="result-count">
-      <span>${list.length}</span> fornecedor${list.length > 1 ? 'es' : ''} encontrado${list.length > 1 ? 's' : ''}
-    </div>
-    ${cards}`;
 }
 
-// ═══════════════════════════════════════
-// BUSCA
-// ═══════════════════════════════════════
-let searchTimer = null;
+function populateSelect() {
+  const sel = document.getElementById('select-fornecedor');
+  sel.innerHTML = '<option value="" disabled selected>— Selecione o fornecedor —</option>';
 
-function onSearch(value) {
-  clearTimeout(searchTimer);
-  const q = value.trim().toUpperCase();
-  if (!q) { renderSuppliers(allSuppliers); return; }
-  searchTimer = setTimeout(() => {
-    const results = allSuppliers.filter(row =>
-      row[COL_NAME] && row[COL_NAME].toUpperCase().includes(q)
-    );
-    renderSuppliers(results);
-  }, 250);
+  allFornecedores.forEach(f => {
+    const opt   = document.createElement('option');
+    opt.value   = f.id;
+    opt.dataset.nome = f.nome;
+    const label = f.fantasia ? `${f.nome} (${f.fantasia})` : f.nome;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+}
+
+function onFornecedorChange(sel) {
+  const opt    = sel.options[sel.selectedIndex];
+  const id     = opt.value;
+  const nome   = opt.dataset.nome || opt.textContent;
+
+  selectedForn = { id, nome };
+
+  // Badge
+  const badge = document.getElementById('fornecedor-badge');
+  document.getElementById('badge-nome').textContent = nome;
+  document.getElementById('badge-id').textContent   = 'ID: ' + id;
+  badge.classList.add('visible');
+
+  updateButtonState();
 }
 
 // ═══════════════════════════════════════
 // CHECKLIST
 // ═══════════════════════════════════════
 function toggleCheck(id) {
-  const el = document.getElementById(id);
-  el.classList.toggle('checked');
-  const allChecked = document.getElementById('check1').classList.contains('checked') &&
-                     document.getElementById('check2').classList.contains('checked');
-  document.getElementById('btn-webhook').disabled = !allChecked;
+  document.getElementById(id).classList.toggle('checked');
+  updateButtonState();
+}
+
+function updateButtonState() {
+  const check1  = document.getElementById('check1').classList.contains('checked');
+  const check2  = document.getElementById('check2').classList.contains('checked');
+  const hasForn = selectedForn !== null;
+  const ok      = check1 && check2 && hasForn;
+
+  document.getElementById('btn-webhook').disabled = !ok;
+
+  const hint = document.getElementById('validation-hint');
+  if (!hasForn) {
+    hint.textContent = 'Selecione um fornecedor.';
+  } else if (!check1 || !check2) {
+    hint.textContent = 'Marque as confirmações para continuar.';
+  } else {
+    hint.textContent = '';
+  }
 }
 
 // ═══════════════════════════════════════
@@ -955,7 +972,6 @@ function toggleCheck(id) {
 function setStep(stepId, iconId, state, iconContent, textId, textContent) {
   const row  = document.getElementById(stepId);
   const icon = document.getElementById(iconId);
-
   row.className = 'status-row ' + state;
   if (state === 'active') {
     icon.innerHTML = '<div class="spinner"></div>';
@@ -971,58 +987,58 @@ function resetModal() {
   const box = document.getElementById('modal-box');
   box.className = 'modal-box';
 
-  const r1 = document.getElementById('step-envio');
-  r1.className = 'status-row';
+  document.getElementById('step-envio').className  = 'status-row';
   document.getElementById('icon-envio').textContent = '⏳';
-
-  const r2 = document.getElementById('step-proc');
-  r2.className = 'status-row';
-  document.getElementById('icon-proc').textContent = '—';
-  document.getElementById('text-proc').textContent = 'Processamento N8N';
-
-  const r3 = document.getElementById('step-bling');
-  r3.className = 'status-row';
+  document.getElementById('step-proc').className   = 'status-row';
+  document.getElementById('icon-proc').textContent  = '—';
+  document.getElementById('text-proc').textContent  = 'Processamento N8N';
+  document.getElementById('step-bling').className  = 'status-row';
   document.getElementById('icon-bling').textContent = '—';
   document.getElementById('text-bling').textContent = 'Criando pedido no Bling';
 
   const msg = document.getElementById('status-msg');
   msg.textContent = '';
-  msg.className = 'status-msg';
+  msg.className   = 'status-msg';
 
   document.getElementById('modal-loading-bar').style.display = 'none';
   document.getElementById('btn-fechar').classList.remove('visible');
-  document.getElementById('modal-close-btn').style.display = 'flex';
+  document.getElementById('modal-close-btn').style.display   = 'flex';
 }
 
 async function runWebhook() {
-  const box = document.getElementById('modal-box');
-  const msg = document.getElementById('status-msg');
+  const box        = document.getElementById('modal-box');
+  const msg        = document.getElementById('status-msg');
   const loadingBar = document.getElementById('modal-loading-bar');
 
-  // Bloqueia fechar durante execução
   document.getElementById('modal-close-btn').style.display = 'none';
-
-  // Ativa e exibe a barra
   loadingBar.style.display = 'block';
-  msg.textContent = 'Lançando pedido de Compras...';
-  msg.className = 'status-msg';
+  msg.textContent = 'Enviando para o N8N...';
 
-  // Inicia animações de status
   setStep('step-envio', 'icon-envio', 'active', '', null, null);
-  setStep('step-proc', 'icon-proc', 'active', '', 'text-proc', 'Aguardando processamento no n8n...');
+  setStep('step-proc',  'icon-proc',  'active', '', 'text-proc',  'Aguardando processamento no N8N...');
   setStep('step-bling', 'icon-bling', 'active', '', 'text-bling', 'Aguardando Bling...');
+
+  // Monta payload com fornecedor selecionado
+  const payload = {
+    id_fornecedor:   selectedForn.id,
+    nome_fornecedor: selectedForn.nome
+  };
 
   let response;
   try {
-    response = await fetch(WEBHOOK_URL, { method: 'GET' });
+    response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
   } catch (err) {
     loadingBar.style.display = 'none';
     setStep('step-envio', 'icon-envio', 'errored', '⚠️', null, null);
-    setStep('step-proc', 'icon-proc', 'errored', '⚠️', null, null);
+    setStep('step-proc',  'icon-proc',  'errored', '⚠️', null, null);
     setStep('step-bling', 'icon-bling', 'errored', '⚠️', null, null);
-    box.className = 'modal-box status-error';
-    msg.textContent = 'Erro de conexão: Não foi possível alcançar o servidor N8N.';
-    msg.className = 'status-msg error';
+    box.className   = 'modal-box status-error';
+    msg.textContent = 'Erro de conexão: não foi possível alcançar o N8N.';
+    msg.className   = 'status-msg error';
     document.getElementById('btn-fechar').classList.add('visible');
     document.getElementById('modal-close-btn').style.display = 'flex';
     return;
@@ -1030,25 +1046,24 @@ async function runWebhook() {
 
   if (!response.ok) {
     loadingBar.style.display = 'none';
-    setStep('step-envio', 'icon-envio', 'done', '✅', null, null);
-    setStep('step-proc', 'icon-proc', 'errored', '⚠️', 'text-proc', 'Falha no workflow');
+    setStep('step-envio', 'icon-envio', 'done',    '✅', null, null);
+    setStep('step-proc',  'icon-proc',  'errored', '⚠️', 'text-proc',  'Falha no workflow');
     setStep('step-bling', 'icon-bling', 'errored', '⚠️', 'text-bling', 'Interrompido');
-    box.className = 'modal-box status-error';
-    msg.textContent = `Erro no workflow (Status HTTP ${response.status}).`;
-    msg.className = 'status-msg error';
+    box.className   = 'modal-box status-error';
+    msg.textContent = `Erro no workflow (HTTP ${response.status}).`;
+    msg.className   = 'status-msg error';
     document.getElementById('btn-fechar').classList.add('visible');
     document.getElementById('modal-close-btn').style.display = 'flex';
     return;
   }
 
   setStep('step-envio', 'icon-envio', 'done', '✅', null, null);
-  setStep('step-proc', 'icon-proc', 'done', '✅', 'text-proc', 'Romaneio processado');
+  setStep('step-proc',  'icon-proc',  'done', '✅', 'text-proc', 'Romaneio processado');
 
   try {
     const resData = await response.json();
-    
     let numeroPedido = null;
-    
+
     if (resData && resData[0] && resData[0].data && resData[0].data.numero) {
       numeroPedido = resData[0].data.numero;
     } else if (resData && resData.data && resData.data.numero) {
@@ -1058,20 +1073,18 @@ async function runWebhook() {
     if (numeroPedido) {
       loadingBar.style.display = 'none';
       setStep('step-bling', 'icon-bling', 'done', '✅', 'text-bling', 'Pedido criado!');
-      box.className = 'modal-box status-success';
-      msg.textContent = `Pedido nº ${numeroPedido} Criado com sucesso`;
-      msg.className = 'status-msg success';
+      box.className   = 'modal-box status-success';
+      msg.textContent = `✅ Pedido nº ${numeroPedido} criado com sucesso`;
+      msg.className   = 'status-msg success';
     } else {
-      throw new Error("Estrutura do JSON não contém o campo numero");
+      throw new Error('Campo numero ausente na resposta');
     }
-
   } catch (jsonError) {
     loadingBar.style.display = 'none';
     setStep('step-bling', 'icon-bling', 'errored', '⚠️', 'text-bling', 'Erro na leitura');
-    box.className = 'modal-box status-error';
-    msg.textContent = 'Erro ao processar a resposta: O pedido pode ter sido criado, mas o número não foi retornado corretamente.';
-    msg.className = 'status-msg error';
-    console.error("Retorno do n8n:", jsonError);
+    box.className   = 'modal-box status-error';
+    msg.textContent = 'Pedido pode ter sido criado, mas o número não foi retornado.';
+    msg.className   = 'status-msg error';
   }
 
   document.getElementById('btn-fechar').classList.add('visible');
@@ -1079,7 +1092,11 @@ async function runWebhook() {
 }
 
 function openModal() {
+  if (!selectedForn) return;
   resetModal();
+  // Mostra fornecedor no modal
+  document.getElementById('modal-forn-info').innerHTML =
+    `Fornecedor: <strong>${selectedForn.nome}</strong> &nbsp;·&nbsp; ID: ${selectedForn.id}`;
   document.getElementById('modal-overlay').classList.add('open');
   runWebhook();
 }
