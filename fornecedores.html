@@ -778,9 +778,8 @@
 const SHEET_ID_USUARIOS  = '1SACFoL_ln9ru4zkZ7LPxiPjfDe6HjPDgqycKFNRZBP8';
 const SHEET_USUARIOS     = 'USUÁRIOS';
 
-// Planilha com aba Fornecedores_EDU (colunas: ID, Nome, Fantasia)
-const SHEET_ID_FORN      = '11NUO5QZSbxYQBHoEaZ3AenJ68JJ1FAx22bh4Wc3FNXs';
-const SHEET_FORN         = 'Fornecedores_EDU';
+// Endpoint N8N que serve a lista de fornecedores (lê Fornecedores_EDU com credenciais do N8N)
+const LISTA_FORN_URL = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/lista-fornecedores';
 
 const WEBHOOK_URL = 'https://cadastrodeprodutos-n8n.zbucu2.easypanel.host/webhook/b0242122-1d55-4c4c-9c3a-7a858b9d9c95';
 
@@ -819,16 +818,17 @@ async function loadUsers() {
 }
 
 async function loadFornecedores() {
-  const table = await fetchSheet(SHEET_ID_FORN, SHEET_FORN);
-  const rows  = tableToRows(table);
-  // Espera colunas: 0=ID, 1=? , 2=Nome (ou 1=Nome dependendo da planilha)
-  // Filtra linhas com ID e Nome válidos
-  allFornecedores = rows.slice(1)
-    .filter(r => r[0] && r[0].trim() !== '')
-    .map(r => ({
-      id:      r[0].trim(),
-      nome:    r[2] && r[2].trim() ? r[2].trim() : (r[1] && r[1].trim() ? r[1].trim() : r[0]),
-      fantasia: r[3] ? r[3].trim() : ''
+  // Busca via N8N — ele lê a planilha com as credenciais do Google
+  const res  = await fetch(LISTA_FORN_URL);
+  const data = await res.json();
+
+  // data = [{ id, nome, fantasia }, ...]
+  allFornecedores = data
+    .filter(f => f.id && f.nome)
+    .map(f => ({
+      id:       String(f.id).trim(),
+      nome:     String(f.nome).trim(),
+      fantasia: f.fantasia ? String(f.fantasia).trim() : ''
     }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
 }
